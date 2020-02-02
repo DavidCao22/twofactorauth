@@ -16,12 +16,13 @@ task :build do
   Jekyll::Commands::Build.build site, config
 end
 
-task proof: 'build' do
+task :proof do
   HTMLProofer.check_directory(
     './_site', \
     assume_extension: true, \
     check_html: true, \
-    disable_external: true
+    disable_external: true, \
+    cache: { timeframe: '2d', storage_dir: '/tmp/html-proofer' }
   ).run
 end
 
@@ -35,12 +36,14 @@ task proof_external: 'build' do
   ).run
 end
 
+# rubocop:disable Metrics/LineLength
 JsonLint::RakeTask.new do |t|
-  t.paths = %w[_site/data.json]
+  t.paths = %w[_site/api/v1/data.json _site/api/v2/all.json _site/api/v2/tfa.json]
 end
+# rubocop:enable Metrics/LineLength
 
 task :verify do
-  ruby './verify.rb'
+  ruby '.tests/verify.rb'
 end
 
 RuboCop::RakeTask.new
